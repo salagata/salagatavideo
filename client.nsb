@@ -1,0 +1,32 @@
+{note:::/client.nsb}
+
+{note:::
+{eval:{text:./error.nsb}}
+}
+
+{note::fetch(url,config?)
+@param {string} url - Url to fetch
+}
+{set:fetch()|{ignore:
+    {set:fetch.response|{request:{
+        "method":{jsonify:{get:fetch(config?).method|GET}},
+        "url":{jsonify:{get:fetch(url)}}
+        {if:{get:fetch(config?).headers}|!=||then:,"headers":{get:fetch(config?).headers}}
+        {if:{get:fetch(config?).body}|!=||then:,"json":{get:fetch(config?).body}}
+    }}}
+
+    {set:fetch.status|{traversejson:status|{get:fetch.response}}}
+    {set:fetch.data|{traversejson:data|{get:fetch.response}}}
+    {if:{get:fetch.status}|!=|200|else:
+        {set:retx|{get:fetch.data}}
+    |then:
+        {set:throw.message|Error {get:fetch.status}: {get:fetch.data}}
+        {eval:{get:throw()}}
+    }
+    {delete:fetch.response} {delete:fetch.status} {delete:fetch.data}
+    {delete:fetch(url)} {delete:fetch(config?).headers} {delete:fetch(config?).body} {delete:fetch(config?).method}
+}}
+
+
+{note:{set:fetch(url)|https://jadestoat.onpella.app/api/v1/effects/list/normal}
+{eval:{get:fetch()}}}

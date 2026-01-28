@@ -1,0 +1,190 @@
+{note:In a future
+    {if:{getuser:authUser}|!=|free|else:{exit:You're banned for using this tag}}
+}
+
+{if:{ismaintag}|=|false|then:
+    {note:Soon make a system to approve parent tag ids like the previous alias system}
+    {exit:https://cdn.discordapp.com/attachments/1124758334805909509/1404622374522847352/image.png?ex=689bdc06&is=689a8a86&hm=204e147dccbb758d5b6bb8d7ac216497fd6eaa8b5a61a3d75e1138ed44e595c3&}
+}
+
+{note:Split the Cipher}
+{set:text2split|{getglobal:cipher}}
+{set:ids|{indexof:=|{get:text2split}}} 
+{set:effectsSource|{substring:{substring:{get:text2split}|{get:ids}}|1}} 
+{set:cipher|{substring:{get:text2split}|0|{get:ids}}} 
+{delete:text2split} {delete:ids}
+
+{note:Prepares assets}
+{set:effectLink|http://api.jsonblob.com/{get:effectsSource}}
+{set:link|https://pastebin.com/raw/{get:cipher}}
+
+{delete:effectsSource}{delete:cipher}
+
+{note:Auth as Owner}
+{set:authOwner|{if:{id}|=|{getglobal:ownerId}|then:true|else:false}}
+
+{if:{arg:0}|=|guild|then:{if:{get:authOwner}|=|true|then:{set:effectList|{download:{get:effectLink}}}
+{eval:{js:
+switch (discord.variables.__args[1]) {
+//    {note::.tag {tagname} guild json
+//    Shows the storage
+//    @restricted @owneronly
+//    @displays {json}}
+    case "json":
+        console.dir(discord.storage)
+        break;
+//    {note::.tag {tagname} guild banuser <id>
+//    @param id {userId} - The ID of the user to ban 
+//    @restricted @owneronly
+//    }
+    case "banuser": 
+        // todo
+        const serverUser = JSON.parse(discord.storage.global.users);
+//    {note::.tag {tagname} guild approveid <id>
+//    @param id {tagId} - The ID of the Parent Tag to approve 
+//    @restricted @owneronly
+//    }
+    case "approveid":
+        let ids = JSON.parse(discord.storage.global.ids);
+        ids.push(discord.variables.__args[2]);
+        discord.storage.global.ids = JSON.stringify(ids);
+        console.log("Succesfully approved tag");
+        break;
+    {note::.tag {tagname} guild removeid <id>
+    @param id {tagId} - The ID of the Parent Tag to remove 
+    @restricted @owneronly
+    }
+    case "removeid":
+        let ids2 = JSON.parse(discord.storage.global.ids);
+        ids2 = ids2.filter(x => x != discord.variables.__args[2]);
+        discord.storage.global.ids = JSON.stringify(ids2);
+        console.log("Succesfully removed tag");
+        break;   
+    {note::.tag {tagname} guild update <newVersion>
+    Updates SalagataVideo metaData version and changes lastUpdate into now date
+    @param newPhase {tagId} - The next Phase 
+    @restricted @owneronly
+    }
+    case "update":
+        let meta = JSON.parse(discord.storage.global.metaInfo);
+        const now = parseInt(Date.now()/1000);
+        const dNow = "<t:"+now+">";
+        meta.lastUpdate = dNow;
+        meta.version = discord.variables.__args[2];
+        discord.storage.global.metaInfo = JSON.stringify(metaInfo);
+        break;
+    {note::.tag {tagname} guild updatecipher <cipher>
+    Updates SalagataVideo cipher
+    @param cipher {text} - The cipher of back code and effect list, separated by = 
+    @restricted @owneronly
+    }
+    case "updatecipher":
+        discord.storage.global.cipher = discord.variables.__args[2];
+        break;
+    {note::.tag {tagname} guild updatephase <nextPhase>
+    Updates SalagataVideo metaData phase 
+    @param nextPhase {text} - The next phase 
+    @restricted @owneronly
+    }
+    case "updatephase":
+        let meta2 = JSON.parse(discord.storage.global.metaInfo);
+        meta2.phase = discord.variables.__args[2];
+        discord.storage.global.metaInfo = JSON.stringify(meta2);
+        break;
+    {note::.tag {tagname} guild debug <code>
+    Debug some tagscript code @debug
+    @param code {codeblock} - Code in TagScript 
+    @restricted @owneronly
+    }
+    case "debug":
+        console.log(discord.variables.__argsString)
+        break;
+    {note::.tag {tagname} guild eval <code>
+    Eval some javascript code ;) @debug
+    @param code {codeblock:javascript} - Code in JavaScript 
+    @restricted @owneronly
+    }
+    case "eval":
+        Function(discord.variables.__argsString)()
+        break;
+    {note::.tag {tagname} guild addeffect <effectName> <effectAuthor> <arguments> <code...>}
+    case "addeffect":
+        const effects = JSON.parse(discord.variables.effectList);
+        effects[discord.variables.__args[2]] = {
+            "code":discord.variables.__args[5],
+            "args":discord.variables.__args[4],
+            "params":new Array(Number(discord.variables.__args[4])).fill(0).map((x,i) => "{"+"arg:"+(i+1)+"}"),
+            "author":discord.variables.__args[3]
+        }
+
+        fetch(discord.variables.effectLink, {
+            method: 'PUT',
+            headers: {
+        "Content-Type":"application/json"
+            },
+            body: JSON.stringify(effects)
+        });
+        break;
+    {note::.tag {tagname} guild addeffect <effectName>}
+    case "deleteeffect":
+        const effects2 = JSON.parse(discord.variables.effectList);
+        delete effects2[discord.variables.__args[2]]
+
+        fetch(discord.variables.effectLink, {
+            method: 'PUT',
+            headers: {
+        "Content-Type":"application/json"
+            },
+            body: JSON.stringify(effects2)
+        });
+        break;
+    default:
+        console.log("Unknown Guild Command")
+        break;
+}}}
+}|else:
+{set:rcg|{range:0|16777216}}
+
+{note::.tag {tagname}
+@displays {embed} - Information about SalagataVideo}
+{if:{argslen}|<|1|then:
+# SalagataVideo (Rewritten) v{traversejson:version|{getglobal:metaInfo}}
+-# Last updated on {traversejson:lastUpdate|{getglobal:metaInfo}}
+{embedjson:{
+    "color": {get:rcg},
+    "author": {
+        "icon_url": "{avatar}",
+        "name": "{user}"
+    },
+    "title": "Basic Usage:",
+    "description": "```\n.tag {tagname} <effect> <effect_args> <subcommand> <subcommand-args>\n```",
+    "footer": {
+        "icon_url": "https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=68b470cd&is=68b31f4d&hm=82e4a26208f6ad8627b760a8bbbcb9801289cf050b04e728e75f4ca4b1df2e07&",
+        "text": "salagatavideo"
+    },
+    "fields": [
+        {
+            "name": "Tips:",
+            "value": "\nTo see the command list: ```\n.tag {tagname} list\n```\nHelp to use salagatavideo:\n```\n.tag {tagname} help\n```\nHelp for a command:\n```\n.tag {tagname} help <effect>\n```"
+        }
+    ]
+}}
+|else:
+
+{note:Download assets}
+
+{set:effectList|{download:{get:effectLink}}}
+{set:phases|{download:https://pastebin.com/raw/25Gxx4mn}}
+{js:{eval:{download:{get:link}}}}
+
+{delete:effectLink}{delete:link}
+
+{note:Handles different types of exits}
+{if:{get:eta}|=|true|then:
+{eval:{download:https://pastebin.com/raw/zxStGZ3w}}
+{if:{get:ext}|=|attach|then:{attachtext:{get:code}}}
+{if:{get:ext}|=|iscript|then:{iscript:load {media} 0
+{get:code}
+}}
+}
+}}

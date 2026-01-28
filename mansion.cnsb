@@ -1,0 +1,79 @@
+{note:::/error.nsb}
+
+{note::throw(message?), throws a command error in an embed
+@param {string} message? - Message, optional}
+{set:throw()|{ignore:
+    {embedjson:{
+      "author": {
+        "icon_url": {jsonify:{avatar}},
+        "name": {jsonify:{user}#{discrim}},
+        "url": "https://discord.com/users/{id}"
+      },
+      "footer": {
+        "icon_url": "https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=68b470cd&is=68b31f4d&hm=82e4a26208f6ad8627b760a8bbbcb9801289cf050b04e728e75f4ca4b1df2e07&",
+        "text": "salagatavideo"
+      },
+      "color": 15746887,
+      "description": {jsonify:{get:throw.message|An error has ocurred!}},
+      "title": "⚠️ Command Error",
+      "type": "inaba"
+    }}
+
+    {delete:throw.message}
+}}
+
+{note:::/client.nsb}
+
+{eval:{text:./error.nsb}}
+
+{set:API|https://jadestoat.onpella.app/api/v1}
+
+{note::fetch(url,config?)
+@param {string} url - Url to fetch
+}
+{set:fetch()|{ignore:
+    {set:fetch.response|{request:{
+        "method":{jsonify:{get:fetch(config?).method|GET}},
+        "url":{jsonify:{get:fetch(url)}}
+        {if:{get:fetch(config?).headers}|!=||then:,"headers":{get:fetch(config?).headers}}
+        {if:{get:fetch(config?).body}|!=||then:,"json":{get:fetch(config?).body}}
+    }}}
+
+    {set:fetch.status|{traversejson:status|{get:fetch.response}}}
+    {set:fetch.data|{traversejson:data|{get:fetch.response}}}
+    {if:{get:fetch.status}|!=|200|else:
+        {set:retx|{get:fetch.data}}
+    |then:
+        {set:throw.message|Error {get:fetch.status}: {get:fetch.data}}
+        {eval:{get:throw()}}
+    }
+    {delete:fetch.response} {delete:fetch.status} {delete:fetch.data}
+    {delete:fetch(url)} {delete:fetch(config?).headers} {delete:fetch(config?).body} {delete:fetch(config?).method}
+}}
+
+
+{set:fetch(url)|{get:API}/effects/list/normal}
+{eval:{get:fetch()}}
+
+
+{note:{getglobal:SALAGATAVIDEO_TOKEN}}
+
+{note:Prevent external execution}
+{if:{ismaintag}|=|false|then:
+    {note:Soon make a system to approve parent tag ids like the previous alias system}
+    {exit:https://cdn.discordapp.com/attachments/1124758334805909509/1404622374522847352/image.png?ex=689bdc06&is=689a8a86&hm=204e147dccbb758d5b6bb8d7ac216497fd6eaa8b5a61a3d75e1138ed44e595c3&}
+}
+
+{note:Headers}
+{set:fetch(config?).headers|{"Authorization":"Bearer {getuser:SALAGATAVIDEO_TOKEN}"}} 
+
+{note:Routers}
+{eval:{replace:^(?<!\\)"(?<effect>.*?)(?<!\\)"|with:{ignore:
+    {set:match|true}
+    {set:params.effect|$<effect>}
+}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}
+
+{if:{get:match}|=|true|then:
+    {set:fetch(url)|https://jadestoat.onpella.app/api/v1/effects/list/{url:{get:params.effect}}}
+    {eval:{get:fetch()}}
+}

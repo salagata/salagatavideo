@@ -1,0 +1,48 @@
+{note:::/mansion.nsb}
+
+{note:::
+{eval:{text:/error.nsb}}
+{eval:{text:/client.nsb}}
+}
+
+{note:{getglobal:SALAGATAVIDEO_TOKEN}}
+{set:API|https://jadestoat.onpella.app/api/v1}
+
+{note:Prevent external execution}
+{if:{ismaintag}|=|false|then:
+    {note:Soon make a system to approve parent tag ids like the previous alias system}
+    {exit:https://cdn.discordapp.com/attachments/1124758334805909509/1404622374522847352/image.png?ex=689bdc06&is=689a8a86&hm=204e147dccbb758d5b6bb8d7ac216497fd6eaa8b5a61a3d75e1138ed44e595c3&}
+}
+
+{note:Headers}
+{set:fetch(config?).headers|{"Authorization":"Bearer {getuser:SALAGATAVIDEO_TOKEN}"}} 
+
+{note:Routers}
+
+{note::.tag {tagname} <effect>
+<effect> - Effect name}
+{eval:{replace:^(?<!\\)"(?<effect>.*?)(?<!\\)"(.*)|with:{ignore:
+    {set:match|true}
+    {set:params.effect|$<effect>}
+}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}
+
+{if:{get:match}|=|true|then:
+    {note:Get effect}
+    {set:fetch(url)|{get:API}/effects/list/{url:{get:params.effect}}}
+    {eval:{get:fetch()}}
+
+    {set:effect|{get:retx}}
+    {set:code|{eval:{traversejson:code|{get:effect}}}}
+
+
+    {note:Load effect(simplified)}
+
+    {set:finalCode|{replace:#|0|{get:code}}}
+    {iscript:load {iv} 0
+{get:finalCode}
+render 0 default salagatavideo}
+
+    {delete:params.effect}
+    {set:match|false}
+    
+}
