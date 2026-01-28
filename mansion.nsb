@@ -35,27 +35,29 @@
 
 {note:Routers}
 
+{set:end|false}
+
 {note::.tag {tagname} list <match>
 <match> - Optional search parameter}
-{if:{get:match}|=|false|then:
-{eval:{replace:(?<!\\)"list(?<!\\)",(?<!\\)"(?<match>.*?)(?<!\\)"|with:{ignore:
+{if:{get:end}|=|false|then:{evalsilent:{replace:(?<!\\)"list(?<!\\)",(?<!\\)"(?<match>.*?)(?<!\\)"(.*)|with:{ignore:
     {set:match|true}
     {set:params.match|$<match>}
-}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}}
+}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}|}
 {if:{get:match}|=|true|then:
     WIP
     {delete:params.match}
+    {set:match|false}
+    {set:end|true}
 }
 
 {note::.tag {tagname} list 
 Shows the effect list}
-{if:{get:match}|=|false|then:
-{eval:{replace:(?<!\\)"list(?<!\\)"|with:{ignore:
+{if:{get:end}|=|false|then:{evalsilent:{replace:(?<!\\)"list(?<!\\)"|with:{ignore:
     {set:match|true}
-}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}}
+}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}|}
 {if:{get:match}|=|true|then:
     {note:Load array library in local}
-    {eval:{text:https://cdn.discordapp.com/attachments/1454915762115444786/1455727090287640627/arraystring.nsb?ex=697613c0&is=6974c240&hm=97613c694b1f2a0cdcfac63851492b2b00ee097707b93bd3e5fd0129851303e1&}}
+    {eval:{text:https://cdn.discordapp.com/attachments/1124758334805909509/1466125781074972734/arraystring.nsb?ex=697b9b89&is=697a4a09&hm=f43a9f69cfa91375c61ebf11062c88c03f2c320c7ffac0a32bc6326dd1463350&}}
     
     {note:Get effect}
     {set:fetch(url)|{get:API}/effects/list/}
@@ -64,21 +66,39 @@ Shows the effect list}
     {set:effectList|{get:retx}}
     {set:array.__this|{get:retx}}
     
-    {eval:{get:array.length}}
+    {set:20_CHUNK_REGEX|(?<!\\)"(.*?)(?<!\\)"(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?}
+
+    {set:effectList.length|{eval:{get:array.length}}}
+
+    {set:pages.length|{len:{replace:0{1,20}|0|{repeat:{get:effectList.length}|0}}}}
     
-    {set:array.slice(start)|0}
-    {set:array.slice(end?)|200}
-    {eval:{get:array.slice()}}
+    {set:effectList.chunked|[{replace:{get:20_CHUNK_REGEX}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:effectList}}|1}}|1}}|with:["$1","$2","$3","$4","$5","$6","$7","$8","$9","$10","$11","$12","$13","$14","$15","$16","$17","$18","$19","$20"]}]}
+    
+    {foreach:{get:effectList.chunked}|,
+        Cluster {get:idx}: {get:valuex}
+        
+    }
+
+    {note:{get:pages.length}|
+        {set:array.__this|{get:retx}}
+        {set:array.slice(start)|{len:{repeat:{get:idx}|00000000000000000000}}}
+        {set:array.slice(end?)|{len:{repeat:{len:{repeat:{get:idx}|0}0}|00000000000000000000}}}
+        [{get:array.slice(start)}:{get:array.slice(end?)}]
+        {eval:{get:array.slice()}}
+        {get:retx}
+    }
+
+
     {set:match|false}
+    {set:end|true}
 }
 
 {note::.tag {tagname} <effect>
 <effect> - Effect name}
-{if:{get:match}|=|false|then:
-{eval:{replace:^(?<!\\)"(?<effect>.*?)(?<!\\)"(.*)|with:{ignore:
+{if:{get:end}|=|false|then:{evalsilent:{replace:^(?<!\\)"(?<effect>.*?)(?<!\\)"(.*)|with:{ignore:
     {set:match|true}
     {set:params.effect|$<effect>}
-}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}}
+}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}|}
 {if:{get:match}|=|true|then:
     {note:Get effect}
     {set:fetch(url)|{get:API}/effects/list/{url:{get:params.effect}}}
@@ -96,14 +116,25 @@ Shows the effect list}
 render 0 default salagatavideo}
 
     {delete:params.effect}
+
     {set:match|false}
-    
+    {set:end|true}
 }
 
 
 {embedjson:{
-      "author": {
+    "author": {
         "icon_url": {jsonify:{avatar}},
         "name": {jsonify:{user}#{discrim}},
         "url": "https://discord.com/users/{id}"
-      },"color":2116051,"description":"This version is VERY UNSTABLE, if something is broken, is your fault 💔, i'll be updating this tag a lot to implement new features, so expect it fails\r\nUse `.tag salagatavideo` to use the stable version","footer":{"icon_url":"https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&","proxy_icon_url":"https://media.discordapp.net/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&","text":"salagatavideo"},"title":"NOTE: Salagatavideo 2.0 is in ALPHA","type":"inaba"}}
+    },
+    "color":2116051,
+    "description":{jsonify:This version is VERY UNSTABLE, if something is broken, i've warned you 💔, i'll be updating this tag a lot to implement new features, so expect it fails
+Use `.tag salagatavideo` to use the stable version},
+    "footer":{
+        "icon_url":"https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
+        "proxy_icon_url":"https://media.discordapp.net/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
+        "text":"salagatavideo - Powered by [Pella.app](https://www.pella.app/)"
+    },
+    "title":"NOTE: Salagatavideo 2.0 is in ALPHA","type":"inaba"
+}}
