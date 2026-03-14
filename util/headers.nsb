@@ -1,0 +1,3 @@
+{note:::/headers}
+
+{set:fetch(config?).headers|{"Authorization":"Bearer {getglobal:SALAGATAVIDEO_TOKEN}"}} 

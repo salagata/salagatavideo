@@ -1,126 +1,29 @@
-{note:::/mansion.nsb}
+{include:lib/error.nsb}
+{include:lib/client.nsb}
 
-{note:::
-{eval:{text:/error.nsb}}
-{eval:{text:/client.nsb}}
-}
+{include:util/chunk.nsb}
 
 {note:{getglobal:SALAGATAVIDEO_TOKEN}}
 {set:API|https://jadestoat.onpella.app/api/v1}
+{set:ARGS_SAFE|{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}
 
 {note:Prevent external execution}
 {if:{ismaintag}|=|false|then:
-    {note:Soon make a system to approve parent tag ids like the previous alias system}
+    {note:TODO: a system to approve parent tag ids like the previous alias system}
     {exit:https://cdn.discordapp.com/attachments/1124758334805909509/1404622374522847352/image.png?ex=689bdc06&is=689a8a86&hm=204e147dccbb758d5b6bb8d7ac216497fd6eaa8b5a61a3d75e1138ed44e595c3&}
 }
 
 {note:Headers}
-{set:fetch(config?).headers|{"Authorization":"Bearer {getuser:SALAGATAVIDEO_TOKEN}"}} 
+{include:util/headers.nsb}
 
 {note:::/mansion.nsb}
 
-{note:::
-{eval:{text:/error.nsb}}
-{eval:{text:/client.nsb}}
-}
-
-{note:{getglobal:SALAGATAVIDEO_TOKEN}}
-{set:API|https://jadestoat.onpella.app/api/v1}
-
-{note:Prevent external execution}
-{if:{ismaintag}|=|false|then:
-    {note:Soon make a system to approve parent tag ids like the previous alias system}
-    {exit:https://cdn.discordapp.com/attachments/1124758334805909509/1404622374522847352/image.png?ex=689bdc06&is=689a8a86&hm=204e147dccbb758d5b6bb8d7ac216497fd6eaa8b5a61a3d75e1138ed44e595c3&}
-}
-
-{note:Routers}
+{note:Rooms}
 
 {set:end|false}
 
-{note::.tag {tagname} list <match>
-<match> - Optional search parameter}
-{if:{get:end}|=|false|then:{evalsilent:{replace:(?<!\\)"list(?<!\\)",(?<!\\)"(?<match>.*?)(?<!\\)"(.*)|with:{ignore:
-    {set:match|true}
-    {set:params.match|$<match>}
-}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}|}
-{if:{get:match}|=|true|then:
-    WIP
-    {delete:params.match}
-    {set:match|false}
-    {set:end|true}
-}
-
-{note::.tag {tagname} list 
-Shows the effect list}
-{if:{get:end}|=|false|then:{evalsilent:{replace:(?<!\\)"list(?<!\\)"|with:{ignore:
-    {set:match|true}
-}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}|}
-{if:{get:match}|=|true|then:
-    {note:Load array library in local}
-    {eval:{text:https://cdn.discordapp.com/attachments/1124758334805909509/1466125781074972734/arraystring.nsb?ex=697b9b89&is=697a4a09&hm=f43a9f69cfa91375c61ebf11062c88c03f2c320c7ffac0a32bc6326dd1463350&}}
-    
-    {note:Get effect}
-    {set:fetch(url)|{get:API}/effects/list/}
-    {eval:{get:fetch()}}
-
-    {set:effectList|{get:retx}}
-    {set:array.__this|{get:retx}}
-    
-    {set:20_CHUNK_REGEX|(?<!\\)"(.*?)(?<!\\)"(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?}
-
-    {set:effectList.length|{eval:{get:array.length}}}
-
-    {set:pages.length|{len:{replace:0{1,20}|0|{repeat:{get:effectList.length}|0}}}}
-    
-    {set:effectList.chunked|[{replace:{get:20_CHUNK_REGEX}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:effectList}}|1}}|1}}|with:["$1","$2","$3","$4","$5","$6","$7","$8","$9","$10","$11","$12","$13","$14","$15","$16","$17","$18","$19","$20"]}]}
-    
-    {foreach:{get:effectList.chunked}|,
-        Cluster {get:idx}: {get:valuex}
-        
-    }
-
-    {note:{get:pages.length}|
-        {set:array.__this|{get:retx}}
-        {set:array.slice(start)|{len:{repeat:{get:idx}|00000000000000000000}}}
-        {set:array.slice(end?)|{len:{repeat:{len:{repeat:{get:idx}|0}0}|00000000000000000000}}}
-        [{get:array.slice(start)}:{get:array.slice(end?)}]
-        {eval:{get:array.slice()}}
-        {get:retx}
-    }
-
-
-    {set:match|false}
-    {set:end|true}
-}
-
-{note::.tag {tagname} <effect>
-<effect> - Effect name}
-{if:{get:end}|=|false|then:{evalsilent:{replace:^(?<!\\)"(?<effect>.*?)(?<!\\)"(.*)|with:{ignore:
-    {set:match|true}
-    {set:params.effect|$<effect>}
-}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:__args}}|1}}|1}}}}|}
-{if:{get:match}|=|true|then:
-    {note:Get effect}
-    {set:fetch(url)|{get:API}/effects/list/{url:{get:params.effect}}}
-    {eval:{get:fetch()}}
-
-    {set:effect|{get:retx}}
-    {set:code|{eval:{traversejson:code|{get:effect}}}}
-
-
-    {note:Load effect(simplified)}
-
-    {set:finalCode|{replace:#|0|{get:code}}}
-    {iscript:load {iv} 0
-{get:finalCode}
-render 0 default salagatavideo}
-
-    {delete:params.effect}
-
-    {set:match|false}
-    {set:end|true}
-}
-
+{include:router/list.nsb}
+{include:router/load.nsb}
 
 {embedjson:{
     "author": {
@@ -134,7 +37,7 @@ Use `.tag salagatavideo` to use the stable version},
     "footer":{
         "icon_url":"https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
         "proxy_icon_url":"https://media.discordapp.net/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
-        "text":"salagatavideo - Powered by [Pella.app](https://www.pella.app/)"
+        "text":"salagatavideo - Powered by Pella.app"
     },
     "title":"NOTE: Salagatavideo 2.0 is in ALPHA","type":"inaba"
 }}

@@ -1,0 +1,29 @@
+{note:/router/load.nsb}
+
+{note::.tag {tagname} <effect>
+<effect> - Effect name}
+{if:{get:end}|=|false|then:{evalsilent:{replace:^(?<!\\)"(?<effect>.*?)(?<!\\)"(.*)|with:{ignore:
+    {set:match|true}
+    {set:params.effect|$<effect>}
+}|in:{get:ARGS_SAFE}}}|}
+{if:{get:match}|=|true|then:
+    {note:Get effect}
+    {set:fetch(url)|{get:API}/effects/list/{url:{get:params.effect}}}
+    {eval:{get:fetch()}}
+
+    {set:effect|{get:retx}}
+    {set:code|{eval:{traversejson:code|{get:effect}}}}
+
+
+    {note:Load effect(simplified)}
+
+    {set:finalCode|{replace:#|0|{get:code}}}
+    {iscript:load {iv} 0
+{get:finalCode}
+render 0 default salagatavideo}
+
+    {delete:params.effect}
+
+    {set:match|false}
+    {set:end|true}
+}

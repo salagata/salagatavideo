@@ -1,0 +1,14 @@
+{note::util/chunk.nsb}
+
+{note::chunk(list) , Chunks an array with strings, into a big array containing array.
+Each of those arrays, have 20 elements of the original one, chunked. 
+@param {string[]} list - A list of elements}
+{set:chunk()|{ignore:
+    {set:chunk.20_CHUNK_REGEX|(?<!\\)"(.*?)(?<!\\)"(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?(?:,(?<!\\)"(.*?)(?<!\\)")?}
+    {set:chunk(list).length|{traversejson:length|{get:chunk(list)}}}
+    {set:chunk.chunked|[{replace:{get:chunk.20_CHUNK_REGEX}|in:{reverse:{substring:{reverse:{substring:{replace:\u007c|\$&|{get:chunk(list)}}|1}}|1}}|with:["$1","$2","$3","$4","$5","$6","$7","$8","$9","$10","$11","$12","$13","$14","$15","$16","$17","$18","$19","$20"]}]}
+    {set:retx|{get:chunk.chunked}}
+    
+    {delete:chunk(list)}
+    {delete:chunk.20_CHUNK_REGEX} {delete:chunk(list).length} {delete:chunk.chunked}
+}}

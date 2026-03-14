@@ -1,8 +1,4 @@
-{note:::/client.nsb}
-
-{note:::
-{eval:{text:./error.nsb}}
-}
+{note:::/fetch.nsb}
 
 {note::fetch(url,config?)
 @param {string} url - Url to fetch

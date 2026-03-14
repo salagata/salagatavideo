@@ -1,0 +1,1 @@
+{and:{replace:.*\s*"id"\s*:\s*"1480707879580209364"\s*.*||{traversejson:roles|{json.member}}}|{exit:You don't have the role <@&1480707879580209364>}}

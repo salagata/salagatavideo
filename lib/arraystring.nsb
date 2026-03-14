@@ -1,0 +1,91 @@
+{note:Array: A data structure which saves elements like a list in many programming languages
+This array needs to use all their elements be strings to simplify the calculus}
+
+{note::array.init: Inits an array @constant,
+@init {array} - []
+@returns {Array}}
+{set:array.init|[]}
+
+{note::array(isString?,...items?): Inits an array @constructor
+@param {[jsonifiedString]} items - Items in the array
+@param {boolean} isString - Set this into true if the values of the array are already string}
+{set:array()|{ignore:{set:array.__this|[{get:array(...items?)}]}{if:{get:array(isString?)}|!=|true|then:{note:You must work with [string] by default, so this won't be executed and won't waste iterations}{set:array.__this|[{substring:{foreach:{get:array.__this}|,{jsonify:{get:valuex}}}|1}]}}{get:array.__this}}}
+
+{note::array.__safe: Get an safe version of the array which is escaped, @getter
+@safe Removes all the escaped characters, replaces the brackets with keys and trims the keys at the corners,
+Used to make calculus where the elements by theirself are not important, Not thought for normal work, 
+@private
+@returns {string} - Safe array}
+{set:array.__safe|{ignore:{replace:\u007b|[|{replace:\u007d|]|{substring:{reverse:{substring:{reverse:{replace:\\.||{get:array.__this}}}|1}}|1}}}}}
+
+{note::array.__trim: @getter @safe Trims the keys at the corners,
+Used when the keys can break the operation, 
+@private
+@returns {string} - Safe array}
+{set:array.__trim|{ignore:{substring:{reverse:{substring:{reverse:{replace:\\.||{get:array.__this}}}|1}}|1}}}
+
+{note::array.length: Gets the length of an array @getter}
+{set:array.length|{ignore:{set:array.length.safe|{eval:{get:array.__safe}}}{if:{get:array.length.safe}|=||then:0|else:{set:array.length.commaCount|{replace:[^,]||{replace:".+?"||{get:array.length.safe}}}}{length:{get:array.length.commaCount},}}{delete:array.length.safe}{delete:array.length.commaCount}}}
+
+{note::array.at(index): Gets an item from the array at the index, but the index can be negative for looking at the end, @safe
+@param {number} index - The index of the value in the array}
+{set:array.at()|{ignore:
+    {if:{get:array.at(index)}|>=|0|then:
+        {set:retx|{traversejson:{get:array.at(index)}|{get:array.__this}}}
+    |else:
+        {set:array.at.length|{eval:{get:array.length}}}
+        {set:retx|{traversejson:{len:{substring:{repeat:{get:array.at.length}|0}|{abs:{get:array.at(index)}}}}|{get:array.__this}}}
+    }
+    {delete:array.at(index)}
+}}
+
+{note::array.forEach(function,noWrap?,noString?): Iterates for each element-only array without using {foreach}, applying a function for each element, and returning an array-like with the output of each code, like .map() in JavaScript
+Use {get:array.forEach(function).valuex} to get the value in each iteration, The value is not un-jsonified! (is still wrapped in the "")
+@param {code} function - A function to iterate, we're assuming you've escaped the | in case you're going to use it outside a code block
+@param {boolean} noWrap? - Prevent to escape the $ in the code
+@param {boolean} noString? - Removes the "" at the start and end, and uses $1 instead of $&
+This iteration method uses regexp to match every object in the string, using the replacer $& as the match.
+Setting noWrap? into true will make that the $ in the code don't get escaped, so it's like replacing straightforward
+Setting noString? into true doesn't un-jsonify the values, only removes the "" at the start and the end}
+{set:array.forEach()|{ignore:
+    {if:{get:array.forEach(noString?)}|=|true|then:
+        {if:{get:array.forEach(noWrap?)}|=|true|then:
+            {eval:{replace:(?<!\\\\)"(.*?)(?<!\\\\)"|in:{get:array.__this}|with:{get:array.forEach(function)}}}
+        |else:
+            {eval:{replace:(?<!\\\\)"(.*?)(?<!\\\\)"|in:{get:array.__this}|with:{ignore:{set:array.forEach(function).valuex|$1}} {replace:\$|$$$$|{get:array.forEach(function)}}}}
+        }
+    |else:
+        {if:{get:array.forEach(noWrap?)}|=|true|then:
+            {eval:{replace:(?<!\\\\)".*?(?<!\\\\)"|in:{get:array.__this}|with:{get:array.forEach(function)}}}
+        |else:
+            {eval:{replace:(?<!\\\\)".*?(?<!\\\\)"|in:{get:array.__this}|with:{ignore:{set:array.forEach(function).valuex|$&}} {replace:\$|$$$$|{get:array.forEach(function)}}}}
+        }
+    }
+    {delete:array.forEach(noWrap?)} {delete:array.forEach(noString?)} {delete:array.forEach(function)}
+    {delete:array.forEach(function).valuex}
+}}
+
+{note::array.slice(start,end?): Slices an array with a start and end (end exclusive)
+@param {number} start - The position to start slicing
+@param {number} end? - The position to end slicing, exclusive}
+{set:array.slice()|{ignore:
+    {if:{get:array.slice(end?)}|!=||then:
+        {set:array.slice.length|{eval:{get:array.length}}}
+    }
+    {set:array.slice.trim|{eval:{get:array.__trim}}}
+    {set:array.slice.sliced|{replace:{repeat:{get:array.slice(start)}|".*?"(?<!\\\\),}(.*)|$1|{get:array.slice.trim}}}
+    {if:{get:array.slice(end?)}|!=||then:
+        {set:array.slice.indexEnd|{len:{substring:{repeat:{get:array.slice.length}|,}|{get:array.slice(end?)}}}}
+        {set:array.slice.sliced|{reverse:{replace:{repeat:{get:array.slice.indexEnd}|".*?"(?<!\\\\),}(.*)|$1|{reverse:{get:array.slice.sliced}}}}}        
+    }
+    {set:retx|[{get:array.slice.sliced}]}
+    {delete:{get:array.slice(end?)}} {delete:array.slice(start)}
+    {delete:array.slice.length} {delete:array.slice.sliced} {delete:array.slice.trim} {delete:array.slice.indexEnd}
+}}
+
+{note::array.concat(array1,array2): Concats an array with another array @static
+@param {[jsonifiedString]} array1 - The first array to concat
+@param {[jsonifiedString]} array2 - The second array to concat}
+{set:array.concat()|{ignore:
+    {set:retx|{reverse:{substring:{reverse:{get:array.concat(array1)}}|1}},{substring:{get:array.concat(array2)}|1}}
+}}

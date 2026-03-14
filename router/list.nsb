@@ -1,0 +1,77 @@
+{note:/router/list.nsb}
+
+{note:Zeta: Command Catalog}
+
+{note::.tag {tagname} list <match>
+<match> - Optional search parameter}
+{if:{get:end}|=|false|then:{evalsilent:{replace:(?<!\\)"list(?<!\\)",(?<!\\)"(?<match>.*?)(?<!\\)"(.*)|with:{ignore:
+    {set:match|true}
+    {set:params.match|$<match>}
+}|in:{get:ARGS_SAFE}}}|}
+{if:{get:match}|=|true|then:
+    WIP
+    {delete:params.match}
+    {set:match|false}
+    {set:end|true}
+}
+
+{note::.tag {tagname} list 
+Shows the effect list}
+{if:{get:end}|=|false|then:{evalsilent:{replace:(?<!\\)"list(?<!\\)"|with:{ignore:
+    {set:match|true}
+}|in:{get:ARGS_SAFE}}}|}
+{if:{get:match}|=|true|then:
+    {note:Get effect}
+    {set:fetch(url)|{get:API}/effects/list/}
+    {eval:{get:fetch()}}
+
+    {set:effectList|{get:retx}}
+    {set:effectList.length|{traversejson:length|{get:effectList}}}
+    
+    {note:Chunking}
+    {set:chunk(list)|{get:effectList}}
+    {eval:{get:chunk()}}
+
+    {set:effectList.chunked|{get:retx}}
+    
+    {set:pages.length|{traversejson:length|{get:effectList.chunked}}}
+
+    {note:Beta: Embed Builder}
+    {foreach:{get:effectList.chunked}|
+        {pagejson:{
+            "content":"Cluster {get:idx}: {get:valuex}"
+        }}
+    }
+    {note:
+    {embedjson:{
+        "embed":{
+            "author": {
+                "icon_url": {jsonify:{avatar}},
+                "name": {jsonify:{user}#{discrim}},
+                "url": "https://discord.com/users/{id}"
+            },
+            "color":2116051,
+            "description":{jsonify:This version is VERY UNSTABLE, if something is broken, i've warned you 💔, i'll be updating this tag a lot to implement new features, so expect it fails
+        Use `.tag salagatavideo` to use the stable version},
+            "footer":{
+                "icon_url":"https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
+                "proxy_icon_url":"https://media.discordapp.net/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
+                "text":"salagatavideo - Powered by Pella.app"
+            },
+            "title":"NOTE: Salagatavideo 2.0 is in ALPHA","type":"inaba"
+        }
+    }}
+    }
+    {note:{get:pages.length}|
+        {set:array.__this|{get:retx}}
+        {set:array.slice(start)|{len:{repeat:{get:idx}|00000000000000000000}}}
+        {set:array.slice(end?)|{len:{repeat:{len:{repeat:{get:idx}|0}0}|00000000000000000000}}}
+        [{get:array.slice(start)}:{get:array.slice(end?)}]
+        {eval:{get:array.slice()}}
+        {get:retx}
+    }
+
+
+    {set:match|false}
+    {set:end|true}
+}
