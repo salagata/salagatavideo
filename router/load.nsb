@@ -11,14 +11,18 @@
     {set:fetch(url)|{get:API}/effects/list/{url:{get:params.effect}}}
     {eval:{get:fetch()}}
 
+    {note:Theta: MediaScript Commands}
+    {note:Iota: Custom Commands}
     {set:effect|{get:retx}}
     {set:code|{eval:{traversejson:code|{get:effect}}}}
 
+    {note:Kappa: Addition of Source}
+    {set:effect.usesSource|{indexof:load|{get:code}}}
 
     {note:Load effect(simplified)}
 
     {set:finalCode|{replace:#|0|{get:code}}}
-    {iscript:load {iv} 0
+    {iscript:load {if:{get:effect.usesSource}|=|-1|then:{iv}|else:{iv:0}} 0
 {get:finalCode}
 render 0 default salagatavideo}
 

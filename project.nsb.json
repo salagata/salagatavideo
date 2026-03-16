@@ -1,0 +1,12 @@
+{
+    "name":"SalagataVideo Beta",
+    "version":"0.2",
+    "host":{
+        "service":"pastebin.com",
+        "link":"https://pastebin.com/GHt6eiq3",
+        "cdn":"https://pastebin.com/raw/GHt6eiq3"
+    },
+    "commands":{
+        "compile": "npx nsb-i mansion.nsb -P"
+    }
+}

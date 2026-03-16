@@ -39,7 +39,7 @@ Shows the effect list}
     {note:Beta: Embed Builder}
     {foreach:{get:effectList.chunked}|
         {pagejson:{
-            "content":"Cluster {get:idx}: {get:valuex}"
+            "content":{jsonify:Cluster {get:idx}: {get:valuex}}
         }}
     }
     {note:
