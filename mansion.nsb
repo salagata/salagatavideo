@@ -2,6 +2,7 @@
 {include:lib/client.nsb}
 
 {include:util/chunk.nsb}
+{include:util/constants.nsb}
 
 {note:{getglobal:SALAGATAVIDEO_TOKEN}}
 {set:API|https://jadestoat.onpella.app/api/v1}

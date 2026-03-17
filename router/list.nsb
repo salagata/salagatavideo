@@ -38,9 +38,17 @@ Shows the effect list}
 
     {note:Beta: Embed Builder}
     {foreach:{get:effectList.chunked}|
-        {pagejson:{
-            "content":{jsonify:Cluster {get:idx}: {get:valuex}}
-        }}
+        {pagejson: {bracketleft}
+            "embed":{bracketleft}
+        "title":"THE effect list Page ({len:{repeat:{get:idx}|0}0}/{get:pages.length})",
+                "description":{jsonify:
+{markuplistdotted:{replace:,|in:{replace:(?<!\\)"(.*?)(?<!\\)"|with:$1|in:{replace:\u005b(.*)\u005d|with:$1|in:{get:valuex}}}|with:|}}
+                },
+                {get:embed.AUTHOR},
+                {get:embed.FOOTER},
+                "color":2116051
+            {bracketright}
+        {bracketright}}
     }
     {note:
     {embedjson:{

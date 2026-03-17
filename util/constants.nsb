@@ -1,0 +1,11 @@
+{set:embed.AUTHOR|"author": {
+    "icon_url": {jsonify:{avatar}},
+    "name": {jsonify:{user}#{discrim}},
+    "url": "https://discord.com/users/{id}"
+}}
+
+{set:embed.FOOTER|"footer":{
+    "icon_url":"https://cdn.discordapp.com/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
+    "proxy_icon_url":"https://media.discordapp.net/attachments/1377013190965203035/1378220702422925412/speed.gif?ex=697ada8d&is=6979890d&hm=77c415699277ff64c216dbe7484042e6026ba953b822029379e66c828d1eec0a&",
+    "text":"salagatavideo - Powered by Pella.app"
+}}
